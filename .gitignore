@@ -1,0 +1,8 @@
+*.pyc
+.idea/
+__pycache__/
+venv/
+migrations/
+*.log
+/staticfiles
+geckodriver
