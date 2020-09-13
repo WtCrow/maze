@@ -1,0 +1,22 @@
+{% extends "index.html" %}
+{% load static %}
+	{% block additional_styles %}
+    <link rel="stylesheet" type='text/css' href="{% static 'game/css/style_menu.css' %}">
+	{% endblock %}
+{% block main_content %}
+<div id="description">
+	<header>Maze game</header>
+	<p>
+		Hello! On this site you can game to maze for a while.<br/>
+		<br/>
+		App written on django and django channels for WebSocket.<br/>
+		<br/>
+		Source code access on this <a target="_blank" title="Source code" href="https://github.com/WtCrow/maze">link</a>.<br/>
+		<br/>
+		Also, you can view my resume: <a target="_blank" href="https://resume.io/r/6gpSY4LLT" title="My resume">link</a><br/>
+		<p align="right">Go to play! :)
+	</p>
+</div>
+<a href="/game" title="Play"><img src="{% static 'game/image/maze.png' %}" class="img_link" alt="Go play"/></a>
+<a href="/score_table" title="Score table"><img src="{% static 'game/image/cup.png' %}" class="img_link" alt="Score table"/></a>
+{% endblock %}

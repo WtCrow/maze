@@ -1,0 +1,27 @@
+{% extends "index.html" %}
+{% load static %}
+	{% block additional_styles %}
+    <link rel="stylesheet" type='text/css' href="{% static 'game/css/style_table.css' %}">
+	{% endblock %}
+{% block main_content %}
+<header>TOP 10</header>
+<div class="table_wrap">
+    <table>
+    <thead>
+        <tr>
+            <th>Nickname</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+    <tbody id="users">
+        {% for record in records %}
+        <tr>
+            <td>{{ record.name }}</td>
+            <td>{{ record.score }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+</div>
+<a href="/">На главную</a>
+{% endblock %}

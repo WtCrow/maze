@@ -1,0 +1,22 @@
+#description {
+    color:white;
+    font-size: 14pt;
+    font-stretch: ultra-expanded;
+    padding: 2%;
+}
+
+.img_link {
+    background-color: white;
+    margin-left: 12%;
+    margin-right: 12%;
+    margin-top: 1%;
+    width: 25%;
+    max-height: 30vh;
+    border-radius: 20px;
+    padding: 1%;
+    transition: 1s;
+}
+
+.img_link:hover {
+    transform: scale(1.05);
+}

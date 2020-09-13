@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type='text/css' href="{% static 'css/style.css' %}">
+    {% block additional_styles %}{% endblock %}
+    <title>{% block title %} Maze {% endblock %}</title>
+</head>
+{% block scripts %}
+{% endblock %}
+<body>
+    <main>
+        {% block main_content %}{% endblock %}
+    </main>
+</body>
+</html>

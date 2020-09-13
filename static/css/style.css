@@ -1,0 +1,46 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+header {
+    color: white;
+    font-size: 20pt;
+    text-align: center;
+    margin-bottom: 1%;
+}
+
+body {
+    margin: 0 auto;
+    padding-left: 10%;
+    padding-right: 10%;
+    padding-top: 3%;
+    background-color: white;
+    min-height: 100%;
+    position: relative;
+}
+
+main {
+    padding: 1%;
+    background-color: #5ad654;
+    border-radius: 20px;
+}
+
+.img_link:hover {
+    transform: scale(1.05);
+}
+
+a {
+  color: #baf0ff;
+}
+
+a:active {
+  color: #b3e8ff;
+}
+
+::selection {
+  background: white;
+  color: black;
+}
