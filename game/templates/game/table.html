@@ -16,7 +16,7 @@
     <tbody id="users">
         {% for record in records %}
         <tr>
-            <td>{{ record.name }}</td>
+            <td>{{ forloop.counter }}. {{ record.name }}</td>
             <td>{{ record.score }}</td>
         </tr>
         {% endfor %}

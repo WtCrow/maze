@@ -15,3 +15,7 @@ class TableScore(ListView):
     def get_queryset(self):
         new_context = ScoreRecord.objects.order_by('-score')[:10]
         return new_context
+
+
+class Game(TemplateView):
+    template_name = 'game/maze.html'

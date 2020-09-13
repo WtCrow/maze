@@ -1,0 +1,16 @@
+.game_zone {
+    display: flex;
+    flex-direction: column;
+    color: white;
+    align-items: center;
+}
+
+.info {
+    font-size: 14pt;
+    padding: 1%;
+}
+
+canvas {
+    border-radius: 15px;
+    background-color: white;
+}

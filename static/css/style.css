@@ -18,8 +18,6 @@ body {
     padding-right: 10%;
     padding-top: 3%;
     background-color: white;
-    min-height: 100%;
-    position: relative;
 }
 
 main {
@@ -28,19 +26,15 @@ main {
     border-radius: 20px;
 }
 
-.img_link:hover {
-    transform: scale(1.05);
-}
-
 a {
   color: #baf0ff;
 }
 
 a:active {
-  color: #b3e8ff;
+  color: white;
 }
 
 ::selection {
   background: white;
-  color: black;
+  color: #0074a6;
 }

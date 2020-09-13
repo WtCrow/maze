@@ -17,6 +17,8 @@
 		<p align="right">Go to play! :)
 	</p>
 </div>
-<a href="/game" title="Play"><img src="{% static 'game/image/maze.png' %}" class="img_link" alt="Go play"/></a>
-<a href="/score_table" title="Score table"><img src="{% static 'game/image/cup.png' %}" class="img_link" alt="Score table"/></a>
+<div class="links">
+	<div class="img_link"><a href="/game" title="Play"><img src="{% static 'game/image/maze.png' %}" alt="Go play"/></a></div>
+	<div class="img_link"><a href="/score_table" title="Score table"><img src="{% static 'game/image/cup.png' %}" alt="Score table"/></a></div>
+</div>
 {% endblock %}
