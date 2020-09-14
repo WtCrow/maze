@@ -25,13 +25,13 @@ class Maze:
 
     def get_access_ways(self):
         access_ways = []
-        if self.x < len(self.matrix_walls[0]) - 1 and not self.matrix_walls[self.y][self.x + 1][Maze.RIGHT]:
+        if not self.matrix_walls[self.y][self.x][Maze.RIGHT]:
             access_ways.append(Maze.RIGHT)
-        if self.x > 0 and not self.matrix_walls[self.y][self.x - 1][Maze.LEFT]:
+        if not self.matrix_walls[self.y][self.x][Maze.LEFT]:
             access_ways.append(Maze.LEFT)
-        if self.y > 0 and not self.matrix_walls[self.y - 1][self.x][Maze.TOP]:
+        if not self.matrix_walls[self.y][self.x][Maze.TOP]:
             access_ways.append(Maze.TOP)
-        if self.y < len(self.matrix_walls) - 1 and not self.matrix_walls[self.y + 1][self.x][Maze.BOTTOM]:
+        if not self.matrix_walls[self.y][self.x][Maze.BOTTOM]:
             access_ways.append(Maze.BOTTOM)
         return access_ways
 
@@ -59,8 +59,7 @@ class Maze:
                 access_ways.remove(Maze.TOP)
             if len(access_ways) != 1:
                 break
-            else:
-                way = access_ways[0]
+            way = access_ways[0]
         return self.x, self.y
 
     def is_finish(self):
