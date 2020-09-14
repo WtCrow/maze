@@ -3,17 +3,17 @@
     {% block additional_styles %}
     <link rel="stylesheet" type='text/css' href="{% static 'game/css/style_maze.css' %}">
     {% endblock %}
-    {% block scripts %}
-    <script src="{% static 'game/js/maze.js' %}"></script>
-    {% endblock %}
 {% block main_content %}
 <div class="game_zone">
     <div class="info">
-        <span>Time: -;</span>
-        <span>Score: -;</span>
-        <span>Size: -x-;</span>
+        <span>Time: 0;</span>
+        <span>Score: 0;</span>
+        <span>Size: 0x0;</span>
     </div>
      <canvas id="MazeCanvas" width="750" height="750"></canvas>
 </div>
-<a href="/">На главную</a>
+{% block scripts %}
+<script src="{% static 'game/js/maze.js' %}"></script>
+{% endblock %}
+<a href="/">Main page</a>
 {% endblock %}
