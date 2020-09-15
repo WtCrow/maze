@@ -4,11 +4,13 @@ from .models import ScoreRecord
 
 class Index(TemplateView):
     """Main page"""
+    http_method_names = ('get', )
     template_name = 'game/menu.html'
 
 
 class TableScore(ListView):
     """Table with top 10 users"""
+    http_method_names = ('get', )
     template_name = 'game/table.html'
     model = ScoreRecord
     context_object_name = 'records'
@@ -20,4 +22,5 @@ class TableScore(ListView):
 
 class Game(TemplateView):
     """Page with game"""
+    http_method_names = ('get', )
     template_name = 'game/maze.html'
