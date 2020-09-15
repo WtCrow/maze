@@ -74,6 +74,13 @@ TEMPLATES = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny'
+    ],
+    'NON_FIELD_ERRORS_KEY': 'error',
+}
+
 WSGI_APPLICATION = 'maze.wsgi.application'
 ASGI_APPLICATION = 'maze.routing.application'
 

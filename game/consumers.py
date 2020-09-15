@@ -1,103 +1,130 @@
-from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import ScoreRecord
+from channels.db import database_sync_to_async
 from .maze import Maze, MazeEncoder
+from .models import ScoreRecord
 from random import randint
 import asyncio
 import json
 
 
 class MazeConsumer(AsyncWebsocketConsumer):
+    """Consumer maze-game messages
+
+    On connect will send start maze and status_game changed from start on wait_move
+    In background worked timer task and send to client message with current time in format:
+    {
+        event: time,
+        content: time -> int  # current time left
+    }
+    If time == 0, status changed on wait_name and send to client message:
+    {
+        event: game_over,
+        content: user_score -> int  # final user score
+    }
+
+    status == start
+        status set while first maze not sent
+        server not received messages
+    status == wait_move
+        server receive messages in format:
+        {
+            event: move,
+            content: direction -> str from list('r', 'l', 't', 'b')  # this direction for movement in maze
+                                                                     # r - right, l - left, t - top, b - bottom
+        }
+        if user moved on finish, will send new maze and time will be increased,
+        else server send new coordinate in maze
+        {
+            event: new_coord,
+            content: [x, y] -> (int, int)
+        }
+    status == wait_name
+        server receive messages in format:
+        {
+            event: name,
+            content: name -> str(min_len=0, max_len=20)
+        }
+        score and name will be save in DB and connection will be close
+
+    If send invalid data, server send message in format
+    {
+        event: error,
+        content: message -> str
+    }
+
+    new_maze event message
+    {
+        event: new_maze,
+        content: {maze: maze, -> str  # json_dumps Maze object, view maze.py
+                  score: score, -> int  # current user score
+                  time: time_left -> int # current time left
+                 }
+    }
+
+    """
+    # server statuses for current connect
     START_STATUS = 'start'
     WAIT_MOVE_STATUS = 'wait_move'
     WAIT_NAME_STATUS = 'wait_name'
 
-    # server events
+    # server side events
     TIMER_EVENT = 'time'
     NEW_MAZE_EVENT = 'new_maze'
     NEW_COORD_EVENT = 'new_coord'
     GAME_OVER_EVENT = 'game_over'
     ERROR_EVENT = 'error'
 
-    # client events
+    # client side events
     MOVE_EVENT = 'move'
     NAME_EVENT = 'name'
 
-    time_on_cell = .1
+    # modifier for time_on_cell. Used on each new level.
+    MOD_TIME = .85
 
     async def connect(self):
-        self.game_status = MazeConsumer.START_STATUS
+        self.time_on_cell = .1
         self.score = 0
         self.maze_size = 10
         self.time_left = 0
 
         await self.accept()
 
-        asyncio.get_event_loop().create_task(self.timer())
+        self.timer_task = asyncio.get_event_loop().create_task(self.timer())
         await self.send_new_maze()
         self.game_status = MazeConsumer.WAIT_MOVE_STATUS
 
     async def disconnect(self, close_code):
-        pass
+        self.timer_task.cancel()
 
     async def receive(self, text_data):
-        # TODO: create DRF serializer and move validation there
+        from .serializers import MazeMessageSerializer
+
         try:
             client_message = json.loads(text_data)
         except json.JSONDecodeError:
-            await self.send(text_data=json.dumps({
-                'event': MazeConsumer.ERROR_EVENT,
-                'data': 'Bad message format.',
-            }))
+            await self.send_error('Bad message format.')
             return
-
-        if 'event' not in client_message:
-            await self.send(text_data=json.dumps({
-                'event': MazeConsumer.ERROR_EVENT,
-                'data': 'Message not contain "event" key.',
-            }))
+        serializer = MazeMessageSerializer(data=client_message, context={'status': self.game_status})
+        if not serializer.is_valid():
+            error = str(list(serializer.errors.values())[0][0])
+            await self.send_error(error)
             return
 
         if client_message['event'] == MazeConsumer.MOVE_EVENT:
-            if self.game_status != MazeConsumer.WAIT_MOVE_STATUS:
-                await self.send(text_data=json.dumps({
-                    'event': MazeConsumer.ERROR_EVENT,
-                    'data': 'Server not receive message for move.',
-                }))
-                return
-
-            if client_message.get('data') not in (Maze.RIGHT, Maze.LEFT, Maze.TOP, Maze.BOTTOM):
-                await self.send(text_data=json.dumps({
-                    'event': MazeConsumer.ERROR_EVENT,
-                    'message': f'Bad "data" key '
-                               f'(must: "{Maze.RIGHT}" | "{Maze.LEFT}" | "{Maze.TOP}" | "{Maze.BOTTOM}").',
-                }))
-                return
-
-            self.maze.go_to(client_message['data'])
+            self.maze.go_to(client_message['content'])
             if self.maze.is_finish():
                 self.score += 1
-                self.maze_size += 5
+                if self.maze_size < 50:
+                    self.maze_size += 5
+                self.time_on_cell *= MazeConsumer.MOD_TIME
                 await self.send_new_maze()
             else:
                 await self.send(text_data=json.dumps({
                     'event': MazeConsumer.NEW_COORD_EVENT,
-                    'data': (self.maze.x, self.maze.y),
+                    'content': (self.maze.x, self.maze.y),
                 }))
         elif client_message['event'] == MazeConsumer.NAME_EVENT:
-            if self.game_status != MazeConsumer.WAIT_NAME_STATUS:
-                await self.send(text_data=json.dumps({
-                    'event': MazeConsumer.ERROR_EVENT,
-                    'data': 'Server not receive message for set name.',
-                }))
-                return
-            name = str(client_message.get('data', ''))
-            if not name or len(name) > 20:
-                await self.send(text_data=json.dumps({
-                    'event': MazeConsumer.ERROR_EVENT,
-                    'data': 'Bad name format (0 < length <= 20).',
-                }))
-                return
+            name = str(client_message.get('content', ''))
 
             await self.write_to_table(name)
             await self.close(code=1000)
@@ -107,21 +134,30 @@ class MazeConsumer(AsyncWebsocketConsumer):
         ScoreRecord.objects.create(name=name, score=self.score)
 
     async def timer(self):
-        while True:
-            await self.send(text_data=json.dumps({'event': MazeConsumer.TIMER_EVENT, 'data': self.time_left}))
-            await asyncio.sleep(1)
-            self.time_left -= 1
+        try:
+            while True:
+                await self.send(text_data=json.dumps({'event': MazeConsumer.TIMER_EVENT, 'content': self.time_left}))
+                await asyncio.sleep(1)
+                self.time_left -= 1
 
-            if self.time_left == 0:
-                self.game_status = MazeConsumer.WAIT_NAME_STATUS
-                await self.send(text_data=json.dumps({'event': MazeConsumer.TIMER_EVENT, 'data': self.time_left}))
-                await self.send(text_data=json.dumps({'event': MazeConsumer.GAME_OVER_EVENT}))
-                break
+                if self.time_left == 0:
+                    self.game_status = MazeConsumer.WAIT_NAME_STATUS
+                    await self.send(text_data=json.dumps({'event': MazeConsumer.TIMER_EVENT, 'content': self.time_left}))
+                    await self.send(text_data=json.dumps({'event': MazeConsumer.GAME_OVER_EVENT, 'content': self.score}))
+                    break
+        except asyncio.CancelledError:
+            pass
 
     async def send_new_maze(self):
         self.maze = Maze(self.maze_size, self.maze_size, randint(0, self.maze_size - 1), randint(0, self.maze_size - 1))
-        self.time_left += int(self.maze_size * self.maze_size * MazeConsumer.time_on_cell)
+        self.time_left += int(self.maze_size * self.maze_size * self.time_on_cell)
         await self.send(text_data=json.dumps({
             'event': MazeConsumer.NEW_MAZE_EVENT,
-            'data': {'maze': self.maze, 'score': self.score, 'time': self.time_left}
+            'content': {'maze': self.maze, 'score': self.score, 'time': self.time_left}
         }, cls=MazeEncoder))
+
+    async def send_error(self, error):
+        await self.send(text_data=json.dumps({
+            'event': MazeConsumer.ERROR_EVENT,
+            'content': error,
+        }))

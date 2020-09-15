@@ -1,9 +1,12 @@
-from json import JSONEncoder, JSONDecoder
 from random import choice, randint
+from json import JSONEncoder
 from copy import copy
 
 
 class Maze:
+    """Class with recursive-generated maze and user, finish coordinates"""
+
+    # access paths direction
     RIGHT = 'r'
     LEFT = 'l'
     TOP = 't'
@@ -13,59 +16,63 @@ class Maze:
         self.x = start_x
         self.y = start_y
 
+        # not inited cell with all walls
         cell_pattern = {Maze.RIGHT: True, Maze.LEFT: True,
                         Maze.TOP: True, Maze.BOTTOM: True,
                         'is_init': False}
         self.matrix_walls = [[copy(cell_pattern) for x in range(columns_count)] for y in range(rows_count)]
 
+        # finish coordinates
         self.max_depth, self.curr_depth = 0, 0
         self.max_depth_x, self.max_depth_y = 0, 0
 
-        self.go_to_cell(self.x, self.y)
+        # start generate
+        self.init_cell(self.x, self.y)
 
-    def get_access_ways(self):
-        access_ways = []
-        if not self.matrix_walls[self.y][self.x][Maze.RIGHT]:
-            access_ways.append(Maze.RIGHT)
-        if not self.matrix_walls[self.y][self.x][Maze.LEFT]:
-            access_ways.append(Maze.LEFT)
-        if not self.matrix_walls[self.y][self.x][Maze.TOP]:
-            access_ways.append(Maze.TOP)
-        if not self.matrix_walls[self.y][self.x][Maze.BOTTOM]:
-            access_ways.append(Maze.BOTTOM)
-        return access_ways
+    def get_access_paths(self):
+        """get path cell without wall"""
+        return list(filter(lambda path: not self.matrix_walls[self.y][self.x][path],
+                           (Maze.RIGHT, Maze.LEFT, Maze.TOP, Maze.BOTTOM)))
 
-    def go_to(self, way):
-        access_ways = self.get_access_ways()
-        if way not in access_ways:
+    def go_to(self, path):
+        """Move while exist only one path except cell from where come
+
+        Return new coordinates
+
+        """
+
+        access_paths = self.get_access_paths()
+        if path not in access_paths:
             return self.x, self.y
 
         while True:
-            if way == Maze.RIGHT:
+            if path == Maze.RIGHT:
                 self.x += 1
-                access_ways = self.get_access_ways()
-                access_ways.remove(Maze.LEFT)
-            elif way == Maze.LEFT:
+                access_paths = self.get_access_paths()
+                access_paths.remove(Maze.LEFT)
+            elif path == Maze.LEFT:
                 self.x -= 1
-                access_ways = self.get_access_ways()
-                access_ways.remove(Maze.RIGHT)
-            elif way == Maze.TOP:
+                access_paths = self.get_access_paths()
+                access_paths.remove(Maze.RIGHT)
+            elif path == Maze.TOP:
                 self.y -= 1
-                access_ways = self.get_access_ways()
-                access_ways.remove(Maze.BOTTOM)
-            elif way == Maze.BOTTOM:
+                access_paths = self.get_access_paths()
+                access_paths.remove(Maze.BOTTOM)
+            elif path == Maze.BOTTOM:
                 self.y += 1
-                access_ways = self.get_access_ways()
-                access_ways.remove(Maze.TOP)
-            if len(access_ways) != 1:
+                access_paths = self.get_access_paths()
+                access_paths.remove(Maze.TOP)
+            if len(access_paths) != 1:
                 break
-            way = access_ways[0]
+            path = access_paths[0]
         return self.x, self.y
 
     def is_finish(self):
+        """Check: finish == current position"""
         return self.x == self.max_depth_x and self.y == self.max_depth_y
 
-    def _get_not_inited_ways(self, x, y):
+    def _get_not_inited_paths(self, x, y):
+        """Get neighboring not inited cells by x and y"""
         not_inited = []
         if x < len(self.matrix_walls[0]) - 1 and not self.matrix_walls[y][x + 1]['is_init']:
             not_inited.append(Maze.RIGHT)
@@ -77,42 +84,59 @@ class Maze:
             not_inited.append(Maze.BOTTOM)
         return not_inited
 
-    def go_to_cell(self, x, y):
+    def init_cell(self, x, y):
+        """Start recursive maze generate.
+
+        Go to random not inited neighboring cell
+        If not neighboring not inited cell then return
+
+        """
         self.matrix_walls[y][x]['is_init'] = True
 
+        # calculate max depth
         self.curr_depth += 1
         if self.curr_depth > self.max_depth:
             self.max_depth = self.curr_depth
             self.max_depth_x = x
             self.max_depth_y = y
-        not_inited = self._get_not_inited_ways(x, y)
+        not_inited = self._get_not_inited_paths(x, y)
 
+        # get all neighboring not inited cell except cell from where come
         while not_inited:
-            way = choice(not_inited)
-            not_inited.remove(way)
-            if way == Maze.RIGHT:
+            path = choice(not_inited)
+            not_inited.remove(path)
+            if path == Maze.RIGHT:
+                # crush wall by path and crush wall neighboring cell by inverse path
                 self.matrix_walls[y][x][Maze.RIGHT] = False
                 self.matrix_walls[y][x + 1][Maze.LEFT] = False
-                self.go_to_cell(x + 1, y)
-            elif way == Maze.LEFT:
+                self.init_cell(x + 1, y)
+            elif path == Maze.LEFT:
                 self.matrix_walls[y][x][Maze.LEFT] = False
                 self.matrix_walls[y][x - 1][Maze.RIGHT] = False
-                self.go_to_cell(x - 1, y)
-            elif way == Maze.TOP:
+                self.init_cell(x - 1, y)
+            elif path == Maze.TOP:
                 self.matrix_walls[y][x][Maze.TOP] = False
                 self.matrix_walls[y - 1][x][Maze.BOTTOM] = False
-                self.go_to_cell(x, y - 1)
-            elif way == Maze.BOTTOM:
+                self.init_cell(x, y - 1)
+            elif path == Maze.BOTTOM:
                 self.matrix_walls[y][x][Maze.BOTTOM] = False
                 self.matrix_walls[y + 1][x][Maze.TOP] = False
-                self.go_to_cell(x, y + 1)
+                self.init_cell(x, y + 1)
             self.curr_depth -= 1
-            not_inited = self._get_not_inited_ways(x, y)
+            not_inited = self._get_not_inited_paths(x, y)
 
 
 class MazeEncoder(JSONEncoder):
-    def default(self, maze):
+    """JSON encoder for Maze object
 
+    Contain:
+        matrix: [[cell, cell],[],[]...]. cell format: {r: bool, l: bool, t: bool, b: bool}
+        current_x, current_y - start user coord
+        max_depth_x, max_depth_y - finish
+
+    """
+
+    def default(self, maze):
         matrix = [[{Maze.RIGHT: cell[Maze.RIGHT], Maze.LEFT: cell[Maze.LEFT],
                     Maze.TOP: cell[Maze.TOP], Maze.BOTTOM: cell[Maze.BOTTOM]}
                    for cell in row] for row in maze.matrix_walls]
