@@ -86,14 +86,6 @@ REST_FRAMEWORK = {
 WSGI_APPLICATION = 'maze.wsgi.application'
 
 ASGI_APPLICATION = 'maze.routing.application'
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": (os.environ.get('REDIS_URL'), ),
-        },
-    },
-}
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases

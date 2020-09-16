@@ -16,7 +16,6 @@ If you want start this project local:
 - DB_PASSWORD
 - DB_HOST
 - DB_PORT
-- REDIS_URL
 6) Create migration: `python manage.py makemigrations game`
 7) Applying migrations: `python manage.py migrate`
 8) Start `python manage.py runserver` or `daphne maze.asgi:application --port 8000 --bind localhost`

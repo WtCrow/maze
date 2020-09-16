@@ -27,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -86,14 +86,6 @@ REST_FRAMEWORK = {
 WSGI_APPLICATION = 'maze.wsgi.application'
 
 ASGI_APPLICATION = 'maze.routing.application'
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": (os.environ.get('REDIS_URL'), ),
-        },
-    },
-}
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
