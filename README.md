@@ -4,11 +4,10 @@ You can see result to this url: https://maze-for-a-while.herokuapp.com/
 
 If you want start this project local:
 
-1) Start redis-server (easy path with docker: `sudo docker run -p 6379:6379 -d redis:5`)
-2) Enter in terminal: `cd /project/path`
-3) Enter in terminal: `pip install -r requirements.txt`
-4) Create empty database
-5) Define next env variable:
+1) Enter in terminal: `cd /project/path`
+2) Enter in terminal: `pip install -r requirements.txt`
+3) Create empty database
+4) Define next env variable:
 - SECRET_KEY
 - DB_ENGINE
 - DB_NAME
@@ -16,8 +15,8 @@ If you want start this project local:
 - DB_PASSWORD
 - DB_HOST
 - DB_PORT
-6) Create migration: `python manage.py makemigrations game`
-7) Applying migrations: `python manage.py migrate`
-8) Start `python manage.py runserver` or `daphne maze.asgi:application --port 8000 --bind localhost`
-9) go to url http://localhost:8000/
-10) Profit!
+5) Create migration: `python manage.py makemigrations game`
+6) Applying migrations: `python manage.py migrate`
+7) Start `python manage.py runserver` or `daphne maze.asgi:application --port 8000 --bind localhost`
+8) go to url http://localhost:8000/
+9) Profit!
