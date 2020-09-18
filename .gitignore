@@ -6,4 +6,3 @@ migrations/
 *.log
 /staticfiles
 geckodriver
-db.sqlite3

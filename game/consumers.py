@@ -89,8 +89,8 @@ class MazeConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        self.timer_task = asyncio.get_event_loop().create_task(self.timer())
         await self.send_new_maze()
+        self.timer_task = asyncio.get_event_loop().create_task(self.timer())
         self.game_status = MazeConsumer.WAIT_MOVE_STATUS
 
     async def disconnect(self, close_code):

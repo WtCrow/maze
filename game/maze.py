@@ -12,7 +12,7 @@ class Maze:
     TOP = 't'
     BOTTOM = 'b'
     
-    def __init__(self, rows_count, columns_count, start_x=0, start_y=0):
+    def __init__(self, rows_count=10, columns_count=10, start_x=0, start_y=0, is_generate=True):
         self.x = start_x
         self.y = start_y
 
