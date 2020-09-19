@@ -26,8 +26,9 @@ class Maze:
         self.max_depth, self.curr_depth = 0, 0
         self.max_depth_x, self.max_depth_y = 0, 0
 
-        # start generate
-        self.init_cell(self.x, self.y)
+        if is_generate:
+            # start generate
+            self.init_cell(self.x, self.y)
 
     def get_access_paths(self):
         """get path cell without wall"""
