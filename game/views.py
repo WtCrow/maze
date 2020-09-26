@@ -16,7 +16,7 @@ class TableScore(ListView):
     context_object_name = 'records'
 
     def get_queryset(self):
-        new_context = ScoreRecord.objects.order_by('-score')[:10]
+        new_context = ScoreRecord.objects.order_by('-score', 'date_create')[:10]
         return new_context
 
 
